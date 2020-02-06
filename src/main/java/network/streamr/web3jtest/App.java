@@ -1,6 +1,7 @@
 package network.streamr.web3jtest;
 
 import network.streamr.contracts.Community;
+import network.streamr.contracts.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.Credentials;
@@ -32,8 +33,10 @@ public class App {
         //listenBlocksWs();
 
         String memberAddress = "0x242752acA5c560457a3C49d17d6F7824a595af18";
-        BigInteger tokens = getWithdrawnTokens(memberAddress);
-        log.info("Tokens withdrawn by " + memberAddress + ": " + tokens.toString());
+        BigInteger withdrawn = getWithdrawnTokens(memberAddress);
+        BigInteger balance = getTokenBalance(memberAddress);
+        log.info("Tokens withdrawn by " + memberAddress + ": " + withdrawn.toString());
+        log.info("Tokens owned by " + memberAddress + ": " + balance.toString());
     }
 
     // Check manually at https://etherscan.io/address/0xF24197f71fC9b2F4F4c24ecE461fB0Ff7C91FD23#readContract
@@ -44,6 +47,14 @@ public class App {
         String privateKey = "0000000100000001000000010000000100000001000000010000000100000001";
         Community c = Community.load(communityAddress, web3j, Credentials.create(privateKey), new DefaultGasProvider());
         return c.withdrawn(memberAddress).send();
+    }
+
+    public static BigInteger getTokenBalance(String memberAddress) throws Exception {
+        Web3j web3j = Web3j.build(new HttpService(url));
+        String tokenAddress = "0x0Cf0Ee63788A0849fE5297F3407f701E122cC023";
+        String privateKey = "0000000100000001000000010000000100000001000000010000000100000001";
+        Token datacoin = Token.load(tokenAddress, web3j, Credentials.create(privateKey), new DefaultGasProvider());
+        return datacoin.balanceOf(memberAddress).send();
     }
 
     public static void listenBlocksHttp() throws IOException {
